@@ -16,6 +16,7 @@ on:
       - "cloudflare-worker/**"
       - "tests/backend/tracking-admin-api.test.mjs"
       - "tests/backend/worker-admin-verify.test.mjs"
+      - "tests/backend/worker-fraud-admin.test.mjs"
       - "functions/_lib/ip-guard.js"
       - ".github/workflows/worker-deploy.yml"
       - "tests/backend/device-token.test.mjs"
@@ -65,7 +66,7 @@ jobs:
 
       - name: Worker tests (order queue, IP blocking, fraud risk, device token)
         if: steps.creds.outputs.ready == 'true'
-        run: node --test tests/backend/order-ip-guard.test.mjs tests/backend/landing-order-queue.test.mjs tests/backend/fraud-risk.test.mjs tests/backend/fraud-review.test.mjs tests/backend/device-token.test.mjs tests/backend/order-otp.test.mjs tests/backend/tracking-admin-api.test.mjs tests/backend/worker-admin-verify.test.mjs
+        run: node --test tests/backend/order-ip-guard.test.mjs tests/backend/landing-order-queue.test.mjs tests/backend/fraud-risk.test.mjs tests/backend/fraud-review.test.mjs tests/backend/device-token.test.mjs tests/backend/order-otp.test.mjs tests/backend/tracking-admin-api.test.mjs tests/backend/worker-admin-verify.test.mjs tests/backend/worker-fraud-admin.test.mjs
 
       - name: Back up the live Worker code
         if: steps.creds.outputs.ready == 'true'
@@ -95,12 +96,14 @@ jobs:
           node --check cloudflare-worker/worker.js
           node --check cloudflare-worker/fraud-review.js
           node --check cloudflare-worker/tracking-admin.js
+          node --check cloudflare-worker/fraud-admin.js
           status=$(curl -sS -w '%{http_code}' -X PUT -H "Authorization: Bearer $CF_TOKEN" \
             -F 'metadata={"main_module":"worker.js"};type=application/json' \
             -F "worker.js=@cloudflare-worker/worker.js;type=application/javascript+module" \
             -F "fraud-risk.js=@cloudflare-worker/fraud-risk.js;type=application/javascript+module" \
             -F "fraud-review.js=@cloudflare-worker/fraud-review.js;type=application/javascript+module" \
             -F "tracking-admin.js=@cloudflare-worker/tracking-admin.js;type=application/javascript+module" \
+            -F "fraud-admin.js=@cloudflare-worker/fraud-admin.js;type=application/javascript+module" \
             "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/workers/scripts/$SCRIPT/content" -o deploy.json)
           echo "Cloudflare upload HTTP status: $status"
           node -e "const r=require('./deploy.json'); if(!r.success){console.error('Cloudflare deploy errors:', JSON.stringify(r.errors || r)); process.exit(1)} console.log('Deployed', r.result && r.result.id || '')"
@@ -124,6 +127,7 @@ jobs:
             if(!raw.includes(moduleName)){console.error('Live Worker response is missing '+moduleName); process.exit(1)}
             if(!raw.includes('fraud-review.js')){console.error('Live Worker response is missing fraud-review.js'); process.exit(1)}
             if(!raw.includes('tracking-admin.js')){console.error('Live Worker response is missing tracking-admin.js'); process.exit(1)}
+            if(!raw.includes('fraud-admin.js')){console.error('Live Worker response is missing fraud-admin.js'); process.exit(1)}
             console.log('Live Worker response contains worker.js and '+moduleName+':', h(want).slice(0,12));"
           sleep 5
           test "$(curl -s -o /dev/null -w '%{http_code}' https://muslimabaya.com/_ma/order)" = "405"

@@ -327,7 +327,7 @@
         if (issueFilter === "flagged" && !issues.length) return false;
         if (issueFilter !== "all" && issueFilter !== "flagged" && issues.indexOf(issueFilter) === -1) return false;
         if (filter === "today") { if (!isToday(o)) return false; }
-        else if (filter === "review") { if (!o.reviewNeeded) return false; }
+        else if (filter === "review") { if (!needsReview(o)) return false; }
         else if (filter !== "all" && o.status !== filter) return false;
         if (!matchesDate(o)) return false;
         if (!matchesCourier(o)) return false;
@@ -438,11 +438,47 @@
         if (o.risk === "medium") return ' <span class="ma-risk-badge is-medium" title="' + esc(why) + '">সন্দেহজনক</span>';
         return "";
       }
+      // Website risk checks (VPN, repeated attempts, same device…) live in the Worker's review database.
+      // They are fetched for the loaded orders and shown next to the history label.
+      var netRisk = {};
+      function isPendingOrder(o) { var st = String(o.status || "Pending").trim().toLowerCase(); return !st || st === "pending"; }
+      function needsReview(o) {
+        if (o.reviewNeeded) return true;
+        var n = netRisk[o.orderId];
+        return !!(n && isPendingOrder(o) && (n.status === "pending" || n.status === "hold" || n.status === "rejected"));
+      }
+      function netRiskBadge(o) {
+        var n = netRisk[o.orderId];
+        if (!n || n.status === "cleared") return "";
+        var why = "ওয়েবসাইট ঝুঁকি " + n.riskScore + "/100" + (n.reasons && n.reasons.length ? " · " + n.reasons.join(" · ") : "");
+        var text = n.status === "rejected" ? "রিভিউতে সন্দেহজনক" : n.status === "hold" ? "রিভিউতে হোল্ড" : "ওয়েবসাইট ঝুঁকি " + n.riskScore;
+        return ' <span class="ma-risk-badge ' + (n.riskLevel === "high" || n.status === "rejected" ? "is-high" : "is-medium") + '" title="' + esc(why) + '">' + esc(text) + '</span>';
+      }
+      function reviewCount() {
+        var extra = all.filter(function (o) { return !o.reviewNeeded && needsReview(o); }).length;
+        return (Number(counts.review) || 0) + extra;
+      }
+      function loadNetRisk() {
+        var s = window.MaAdmin && MaAdmin.getSession ? MaAdmin.getSession() : null;
+        var ids = all.map(function (o) { return o.orderId; }).filter(function (id) { return id && !Object.prototype.hasOwnProperty.call(netRisk, id); }).slice(0, 300);
+        if (!s || !s.token || !ids.length) return;
+        ids.forEach(function (id) { netRisk[id] = null; });
+        fetch("/_ma/admin/fraud", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: s.token, action: "order_risk", orderIds: ids }) })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (!d || !d.ok) { ids.forEach(function (id) { delete netRisk[id]; }); return; }
+            Object.keys(d.risks || {}).forEach(function (id) { netRisk[id] = d.risks[id]; });
+            renderTabs();
+            renderRows();
+          })
+          .catch(function () { ids.forEach(function (id) { delete netRisk[id]; }); });
+      }
       function renderTabs() {
         var tabs = [["all", "সব"], ["today", "আজকের"], ["review", "রিভিউ দরকার"]].concat(statuses.map(function (s) { return [s, statusBn(s)]; }))
-          .filter(function (t) { return t[0] === "all" || t[0] === filter || (counts[t[0]] || 0) > 0; });
+          .filter(function (t) { return t[0] === "all" || t[0] === filter || (t[0] === "review" ? reviewCount() : (counts[t[0]] || 0)) > 0; });
         document.getElementById("ordTabs").innerHTML = tabs.map(function (t) {
-          return '<button type="button" class="pn-tab' + (filter === t[0] ? " active" : "") + '" data-f="' + esc(t[0]) + '"' + (filter === t[0] ? ' aria-current="true"' : '') + '>' + esc(t[1]) + " <em>(" + (counts[t[0]] || 0) + ")</em></button>";
+          return '<button type="button" class="pn-tab' + (filter === t[0] ? " active" : "") + '" data-f="' + esc(t[0]) + '"' + (filter === t[0] ? ' aria-current="true"' : '') + '>' + esc(t[1]) + " <em>(" + (t[0] === "review" ? reviewCount() : (counts[t[0]] || 0)) + ")</em></button>";
         }).join("");
       }
 
@@ -513,7 +549,7 @@
             '<td class="wc-col-cb">' + (canOpen ? '<input type="checkbox" class="ot-sel" data-oid="' + esc(o.orderId) + '" aria-label="' + esc(o.orderId) + ' বাছুন">' : '') + '</td>' +
             '<td class="wc-col-order" data-label="অর্ডার"><div class="wc-order-line">' +
               (canOpen ? '<a class="oi-link wc-order-link" href="admin-order.html?id=' + encodeURIComponent(o.orderId) + '">' + esc(label) + '</a>' : '<span class="wc-order-link is-plain">' + esc(label) + (o.row ? ' <span class="sub">(সারি ' + esc(o.row) + ')</span>' : '') + '</span>') +
-              (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : '') + riskBadge(o) +
+              (o.blocked ? ' <span class="pn-badge blocked">Blocked</span>' : '') + riskBadge(o) + netRiskBadge(o) +
               '<button type="button" class="wc-eye wo-preview-btn" data-preview-id="' + esc(o.orderId || "") + '" data-preview-row="' + esc(o.row || "") + '" title="Preview" aria-label="' + esc(label) + ' প্রিভিউ">' + eyeSvg + '</button>' +
             '</div><div class="ot-wa-slot" hidden></div></td>' +
             '<td class="wc-col-customer" data-label="কাস্টমার">' + (o.name ? '<strong class="wc-customer-name">' + esc(o.name) + '</strong>' : '') + (phone ? '<a class="wc-customer-phone" href="tel:' + esc(phone) + '">' + esc(phone) + '</a>' : '') + (!o.name && !phone ? '<span class="sub">তথ্য নেই</span>' : '') + customerBadge(o) + '</td>' +
@@ -591,6 +627,7 @@
         renderTabs();
         renderRows();
         renderPagination();
+        loadNetRisk();
       }
 
       function load(options, append) {

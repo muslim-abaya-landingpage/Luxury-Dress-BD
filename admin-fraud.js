@@ -9,15 +9,23 @@
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
   function session() { return window.MaAdmin && MaAdmin.getSession ? MaAdmin.getSession() : null; }
+  // Served by the Cloudflare Worker (/_ma/admin/fraud): it has the review database and checks the login
+  // with Apps Script, so no Google service-account secret is needed.
   function request(fields) {
     var s = session();
     if (!s || !s.token) return Promise.reject(new Error("LOGIN_REQUIRED"));
-    var body = new URLSearchParams(Object.assign({ Token: s.token }, fields));
-    return fetch("/api/admin-fraud", {
+    var body = { token: s.token, action: fields.Action };
+    if (fields.Status != null) body.status = fields.Status;
+    if (fields.Limit != null) body.limit = Number(fields.Limit);
+    if (fields.Cursor != null) body.cursor = fields.Cursor;
+    if (fields.ReviewId != null) body.reviewId = fields.ReviewId;
+    if (fields.Reason != null) body.reason = fields.Reason;
+    if (fields.ExpectedVersion != null) body.expectedVersion = Number(fields.ExpectedVersion);
+    return fetch("/_ma/admin/fraud", {
       method: "POST",
       credentials: "same-origin",
-      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-      body: body.toString()
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
     }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok || !data.ok) throw new Error(data.error || ("HTTP_" + response.status));
