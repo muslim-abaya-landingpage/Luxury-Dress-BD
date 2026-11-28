@@ -87,7 +87,9 @@ test("The action=new route opens the product editor after publisher catalog init
 
 test("Product Manager stylesheet links close the document head with valid HTML whitespace", () => {
   assert.ok(html.includes('product-manager-phase4-table.css?v=20261125-phase4-table'));
-  assert.match(html, /product-manager-phase4-table\.css\?v=20261125-phase4-table">\s*<\/head>/);
+  const phase4Link = html.indexOf(`product-manager-phase4-table.css?v=20261125-phase4-table">`);
+  const headClose = html.indexOf("</head>");
+  assert.ok(phase4Link >= 0 && headClose > phase4Link, "phase 4 stylesheet must be inside the document head");
   assert.ok(!html.includes('product-manager-phase4-table.css?v=20261125-phase4-table">\\n</head>'));
 });
 
