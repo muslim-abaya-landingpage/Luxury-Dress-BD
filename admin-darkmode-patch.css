@@ -49,6 +49,12 @@ html[data-admin-theme="dark"].wp-admin-shell select,
 html[data-admin-theme="dark"].wp-admin-shell textarea{
   background:#132019!important;color:#e5f1e8!important;border-color:#3c434a!important;
 }
+html[data-admin-theme="dark"] .cu-search-row input:focus{border-color:#3fa377!important;box-shadow:0 0 0 3px #1f8f6333!important}
+/* Customer profile: recent-search chips are plain <button>s, so the generic
+   input/select/textarea dark rule above does not reach them. */
+html[data-admin-theme="dark"] .cu-recent button{background:#17251e!important;border-color:#3c434a!important;color:#b7cdbd!important}
+html[data-admin-theme="dark"] .cu-recent button:hover{background:#1c2f24!important;border-color:#3fa377!important}
+
 /* thead/table generic header that several pages leave unguarded */
 html[data-admin-theme="dark"].wp-admin-shell .pn-table thead th,
 html[data-admin-theme="dark"].wp-admin-shell table thead th{background:#22392c!important;color:#d4e8da!important;border-color:#314a3a!important;}

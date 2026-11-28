@@ -143,11 +143,14 @@ html[data-admin-theme="dark"] .dzc-range>button:not([aria-pressed="true"]),html[
 .pf-cost{width:110px;min-height:34px;padding:0 8px}
 .pf-pos{color:#16794a;font-weight:700}.pf-neg{color:#b42318;font-weight:700}
 /* ---- Customer profile ---- */
-.cu-search label{display:block;font-weight:600;margin-bottom:6px}
-.cu-search-row{display:flex;gap:8px;max-width:520px}
-.cu-search-row input{flex:1;min-width:0;min-height:44px;padding:0 12px;font-size:16px}
-.cu-recent{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12.5px;color:var(--mt-muted)}
-.cu-recent button{min-height:30px;padding:0 10px;border:1px solid var(--mt-line-2);border-radius:999px;background:#fff;font:inherit;font-size:12.5px;cursor:pointer}
+.cu-search label{display:block;font-weight:700;font-size:13px;color:var(--mt-ink);margin-bottom:9px}
+.cu-search-row{display:flex;gap:10px;max-width:560px;margin-bottom:11px}
+.cu-search-row input{flex:1;min-width:0;min-height:46px;padding:0 14px;font-size:16px;border-radius:11px;border:1px solid var(--mt-line-2);background:var(--mt-card);color:var(--mt-ink);transition:border-color .15s,box-shadow .15s}
+.cu-search-row input:focus{outline:none;border-color:#1f8f63;box-shadow:0 0 0 3px #1f8f6322}
+.cu-search .st-hint{margin:0 0 16px}
+.cu-recent{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12.5px;color:var(--mt-muted)}
+.cu-recent button{min-height:32px;padding:0 12px;border:1px solid var(--mt-line-2);border-radius:999px;background:var(--mt-card);color:var(--mt-ink);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:border-color .15s,background .15s}
+.cu-recent button:hover{border-color:#1f8f63;background:#1f8f630d}
 .cu-head{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .cu-avatar{flex:none;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--mt-navy-2),var(--mt-navy));color:#f3d59f;font-weight:800;font-size:20px}
 .cu-who{flex:1;min-width:0}.cu-who h2{margin:0}.cu-who p{margin:2px 0 0;color:var(--mt-muted);font-size:13px;overflow-wrap:anywhere}
@@ -166,7 +169,7 @@ html[data-admin-theme="dark"] .dzc-range>button:not([aria-pressed="true"]),html[
 .ac-details{color:var(--mt-muted);font-size:12.5px;max-width:420px;overflow-wrap:anywhere}
 .ac-role{padding:1px 6px;border-radius:6px;background:#eef1f6;color:#4b5565;font-size:11px}
 @media (max-width:640px){.cu-head{flex-wrap:wrap}.pf-controls{align-items:stretch}.pf-basis{flex-wrap:wrap}}
-.cu-search-row .adm-btn{flex:0 0 auto!important;width:auto!important;min-height:44px;padding:0 20px}
+.cu-search-row .adm-btn{flex:0 0 auto!important;width:auto!important;min-height:46px;padding:0 22px;border-radius:11px!important}
 .pf-head .adm-btn{width:auto!important}
 #cuRecent td,.ac-table td.ac-time{white-space:nowrap}
 .adm-main table a{color:var(--mt-navy-2);font-weight:600;text-decoration:none}
