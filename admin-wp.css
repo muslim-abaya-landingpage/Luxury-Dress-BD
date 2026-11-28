@@ -333,8 +333,12 @@ html.wp-admin-shell textarea:focus { border-color: var(--wp-link) !important; bo
 /* ---------- Full-height menu column, page padding, flat WordPress boxes everywhere ---------- */
 @media (min-width: 981px) {
   html.wp-admin-shell .adm-sidebar { height: calc(100vh - var(--wp-bar-h)) !important; max-height: none !important; }
-  /* WordPress paints the menu colour down the whole left edge, even past the last item. */
-  html.wp-admin-shell body::before {
+  /* WordPress paints the menu colour down the whole left edge, even past the last item.
+     Scoped to pages that actually have a sidebar — without this guard the strip also
+     painted over sidebar-less pages (SMS settings, accounting, cache manager, reports),
+     covering their leftmost ~246px of real content since it's a fixed z-index:0 layer
+     that paints above static in-flow content. */
+  html.wp-admin-shell body:has(.adm-sidebar)::before {
     content: ""; position: fixed; top: 0; bottom: 0; left: 0; width: var(--wp-menu-w);
     background: var(--wp-menu); z-index: 0; pointer-events: none;
   }
