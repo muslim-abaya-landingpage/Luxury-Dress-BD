@@ -1,4 +1,24 @@
 /* Premium Support Inbox UI — visual-only overrides; preserves existing data and actions. */
+
+/* Root-cause fix: at desktop widths, admin-premium-unified.css switches the
+   sitewide .adm-sidebar from fixed to sticky (position:sticky!important) so
+   it behaves inside the shared .adm-shell CSS-grid layout used by every
+   other admin page. This page has no .adm-shell — it has its own .app
+   wrapper, which admin-wp.css forces to display:block and shifts .main over
+   with margin-left instead of a grid column. In plain block flow a sticky
+   sidebar still occupies its own full-viewport-height row, so .main (the
+   next block sibling) gets pushed entirely below the fold — the content
+   area reads as blank with the topbar stranded at the very bottom.
+   Restoring position:fixed here (specificity (0,2,2), beating the sticky
+   rule's (0,2,1) regardless of source order) takes the sidebar out of flow
+   again, matching what this page's own margin-left-based .main offset was
+   written to assume. */
+@media (min-width:981px){
+  html.wp-admin-shell body > .app > .adm-sidebar{
+    position:fixed!important;
+  }
+}
+
 :root{
   --ink:#202a38;--muted:#738092;--line:#e8ebf0;--paper:#fff;--wash:#f7f8fa;
   --gold:#b58a48;--green:#168653;--shadow:0 8px 28px rgba(23,34,51,.055);
