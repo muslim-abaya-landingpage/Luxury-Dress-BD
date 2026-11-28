@@ -55,6 +55,22 @@ html[data-admin-theme="dark"] .cu-search-row input:focus{border-color:#3fa377!im
 html[data-admin-theme="dark"] .cu-recent button{background:#17251e!important;border-color:#3c434a!important;color:#b7cdbd!important}
 html[data-admin-theme="dark"] .cu-recent button:hover{background:#1c2f24!important;border-color:#3fa377!important}
 
+/* Fraud review (admin-fraud.html): --adm-card/--adm-border are never redefined
+   for dark here, so the protection-config tiles and status pill need their
+   own colours, matching the forest-green dark palette used across the panel. */
+html[data-admin-theme="dark"] .fr-controls select:focus{border-color:#3fa377!important;box-shadow:0 0 0 3px #1f8f6333!important}
+html[data-admin-theme="dark"] .fr-protection-tile{background:#17251e!important;border-color:#2c4335!important}
+html[data-admin-theme="dark"] .fr-protection-tile span{color:#7f9488!important}
+html[data-admin-theme="dark"] .fr-protection-tile b{color:#e5f1e8!important}
+html[data-admin-theme="dark"] .fr-protection-grid>p{color:#9db7a5!important}
+html[data-admin-theme="dark"] .fr-state-badge{background:#22392c!important;color:#d4e8da!important}
+html[data-admin-theme="dark"] .fr-state-badge.is-ok{background:#163826!important;color:#8fe0ad!important}
+html[data-admin-theme="dark"] .fr-state-badge.is-warn{background:#4a3c14!important;color:#f0d78b!important}
+html[data-admin-theme="dark"] .fr-state-badge.is-bad{background:#3a1f1f!important;color:#f0a7ac!important}
+html[data-admin-theme="dark"] .fr-reasons{background:#17251e!important}
+html[data-admin-theme="dark"] .fr-customer-kpi{background:#17251e!important;border-color:#2c4335!important}
+html[data-admin-theme="dark"] .fr-customer-kpi small{color:#9db7a5!important}
+
 /* thead/table generic header that several pages leave unguarded */
 html[data-admin-theme="dark"].wp-admin-shell .pn-table thead th,
 html[data-admin-theme="dark"].wp-admin-shell table thead th{background:#22392c!important;color:#d4e8da!important;border-color:#314a3a!important;}

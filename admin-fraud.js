@@ -45,22 +45,31 @@
     el.textContent = String(error && error.message || error);
     el.hidden = false;
   }
+  function setProtectionState(text, kind) {
+    var state = byId("frProtectionState");
+    state.textContent = text;
+    state.className = "fr-state-badge" + (kind ? " is-" + kind : "");
+  }
+  function tile(label, value) {
+    return '<div class="fr-protection-tile"><span>' + esc(label) + '</span><b>' + value + '</b></div>';
+  }
   function loadProtectionStatus() {
-    var target=byId("frProtectionDetails"), state=byId("frProtectionState");
+    var target=byId("frProtectionDetails");
     var s=window.MaAdmin&&MaAdmin.getSession?MaAdmin.getSession():null;
-    if(!s||!s.token){state.textContent="Login required";target.textContent="অ্যাডমিন সেশন পাওয়া যায়নি।";return;}
+    if(!s||!s.token){setProtectionState("Login required","warn");target.innerHTML='<p>অ্যাডমিন সেশন পাওয়া যায়নি।</p>';return;}
     fetch("/_ma/admin/order-settings?token="+encodeURIComponent(s.token),{cache:"no-store"})
       .then(function(r){return r.json().then(function(data){if(!r.ok||!data.ok)throw new Error(data.error||("HTTP_"+r.status));return data;});})
       .then(function(data){
         var settings=data.settings||{}, integrations=data.integrations||{};
         var otp=!!integrations.whatsappOtp, courier=!!settings.courierProtection;
-        state.textContent="Connected";
-        target.innerHTML='<p><strong>WhatsApp OTP:</strong> '+(otp?"Credentials configured":"Not configured")+'</p>'+
-          '<p><strong>OTP policy:</strong> '+(settings.mobileVerification?"Enabled for eligible risk orders":"Disabled")+'</p>'+
-          '<p><strong>Courier protection:</strong> '+(courier?"Enabled":"Disabled")+'</p>'+
-          '<p><strong>Minimum delivery success ratio:</strong> '+esc(settings.courierSuccessRatio==null?"—":settings.courierSuccessRatio+"%")+'</p>'+
-          '<p><strong>Duplicate protection:</strong> '+(settings.duplicateBlock?"Enabled":"Disabled")+' · '+esc(settings.duplicateWindowMinutes||"—")+' minutes</p>';
-      }).catch(function(error){state.textContent="Unavailable";target.textContent="Worker configuration পাওয়া যায়নি: "+String(error.message||error)+". Secrets-এর মান এখানে দেখানো হয় না।";});
+        setProtectionState("Connected","ok");
+        target.innerHTML=
+          tile("WhatsApp OTP", otp?"Credentials configured":"Not configured")+
+          tile("OTP policy", settings.mobileVerification?"Enabled for eligible risk orders":"Disabled")+
+          tile("Courier protection", courier?"Enabled":"Disabled")+
+          tile("Minimum delivery success ratio", esc(settings.courierSuccessRatio==null?"—":settings.courierSuccessRatio+"%"))+
+          tile("Duplicate protection", (settings.duplicateBlock?"Enabled":"Disabled")+" · "+esc(settings.duplicateWindowMinutes||"—")+" minutes");
+      }).catch(function(error){setProtectionState("Unavailable","bad");target.innerHTML='<p>Worker configuration পাওয়া যায়নি: '+esc(String(error.message||error))+'. Secrets-এর মান এখানে দেখানো হয় না।</p>';});
   }
   function load(append) {
     append = append === true;
