@@ -58,6 +58,40 @@
 .st-msgr-security{display:flex;gap:8px;align-items:flex-start;margin-top:13px;color:#64748b;font-size:11px;line-height:1.55}
 .st-msgr-security strong{color:#344054}.st-msgr-panel .st-result{margin-top:12px}
 @media(max-width:760px){.st-msgr-form{grid-template-columns:1fr}.st-msgr-form .adm-btn{width:100%}.st-msgr-status-head,.st-msgr-form-title{align-items:flex-start;flex-direction:column;gap:3px}.st-msgr-heading{gap:10px}.st-msgr-mark{width:42px;height:42px;flex-basis:42px}}
+.cr-rate-card{display:block;margin:18px 0 4px;padding:18px;border:1px solid #d9e6df;border-radius:15px;background:linear-gradient(180deg,#fcfdfc 0%,#f6faf7 100%)}
+.cr-rate-head{display:flex;align-items:flex-start;gap:13px;margin-bottom:14px}
+.cr-rate-mark{width:40px;height:40px;flex:0 0 40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#1f8f63,#176b4a);color:#eafff3;box-shadow:0 6px 16px rgba(23,107,74,.25)}
+.cr-rate-head h3{margin:2px 0 4px;font-size:15px;color:#17243a}
+.cr-rate-hint{margin:0;max-width:640px;font-size:12.5px;line-height:1.6;color:#5b6b63}
+.cr-rate-table-wrap{overflow-x:auto;border:1px solid #e1ebe5;border-radius:11px;background:#fff}
+.cr-rate-table{width:100%;min-width:460px;border-collapse:collapse;font-size:13px}
+.cr-rate-table thead th{text-align:left;padding:9px 12px;font-size:11px;font-weight:700;color:#6d7d74;border-bottom:1px solid #e1ebe5}
+.cr-rate-table tbody th{text-align:left;padding:11px 12px;font-weight:700;color:#17243a;white-space:nowrap}
+.cr-rate-table tbody td{padding:8px 12px}
+.cr-rate-table tbody tr+tr th,.cr-rate-table tbody tr+tr td{border-top:1px solid #eef3f0}
+.cr-rate-table tbody tr:hover{background:#f5fbf7}
+.cr-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.cr-steadfast .cr-dot{background:#1f8f63}
+.cr-pathao .cr-dot{background:#e0563a}
+.cr-redx .cr-dot{background:#9c2b3e}
+.cr-input{display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:0 10px;border:1px solid #d7dde6;border-radius:9px;background:#fff}
+.cr-input i{font-style:normal;color:#8a978f;font-size:12.5px}
+.cr-input input{width:72px;border:0;background:transparent;padding:8px 0;font:inherit;color:#17243a}
+.cr-input input:focus{outline:none}
+.cr-input:focus-within{border-color:#1f8f63;box-shadow:0 0 0 3px #1f8f6322}
+.cr-rate-actions{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+html[data-admin-theme="dark"] .cr-rate-card{background:linear-gradient(180deg,#17251e 0%,#132019 100%);border-color:#2c4335}
+html[data-admin-theme="dark"] .cr-rate-head h3{color:#eaf4ec}
+html[data-admin-theme="dark"] .cr-rate-hint{color:#9db7a5}
+html[data-admin-theme="dark"] .cr-rate-table-wrap{background:#17251e;border-color:#2c4335}
+html[data-admin-theme="dark"] .cr-rate-table thead th{color:#9db7a5;border-bottom-color:#2c4335}
+html[data-admin-theme="dark"] .cr-rate-table tbody th{color:#e5f1e8}
+html[data-admin-theme="dark"] .cr-rate-table tbody tr+tr th,html[data-admin-theme="dark"] .cr-rate-table tbody tr+tr td{border-top-color:#24362b}
+html[data-admin-theme="dark"] .cr-rate-table tbody tr:hover{background:#1c2f24}
+html[data-admin-theme="dark"] .cr-input{background:#132019;border-color:#3c434a}
+html[data-admin-theme="dark"] .cr-input i{color:#7f9488}
+html[data-admin-theme="dark"] .cr-input input{color:#e5f1e8}
+@media(max-width:600px){.cr-rate-card{padding:14px}.cr-rate-table{min-width:0}.cr-input input{width:54px}}
 </style>
 <link rel="stylesheet" href="admin-premium-unified.css?v=20261125-sidebar-hover-stable">
   <link rel="stylesheet" href="admin-darkmode-patch.css?v=20261128-darkmode-patch2">
@@ -178,18 +212,40 @@
             <button type="submit" id="stGhKeySave" class="adm-btn">Key যাচাই করে Save করুন</button>
             <span id="stGhKeyResult" class="st-result" role="status"></span>
           </form>
-          <form id="stCourierRatesForm" class="st-ghkey" autocomplete="off" style="margin-top:18px">
-            <label><b>কুরিয়ার চার্জ তুলনা</b> — আপনার নিজের Pathao/RedX অ্যাকাউন্টে যে হার দেখায়, সেটাই এখানে বসান (খালি রাখলে সেই কুরিয়ারের তুলনা দেখানো হবে না)</label>
-            <table class="st-tokens" style="margin:8px 0">
-              <thead><tr><th></th><th>ঢাকার ভিতরে (৳)</th><th>ঢাকার বাইরে (৳)</th></tr></thead>
-              <tbody>
-                <tr><td>Steadfast</td><td><input type="number" min="0" max="2000" id="crSteadfastInside" class="st-rate-in"></td><td><input type="number" min="0" max="2000" id="crSteadfastOutside" class="st-rate-in"></td></tr>
-                <tr><td>Pathao</td><td><input type="number" min="0" max="2000" id="crPathaoInside" class="st-rate-in"></td><td><input type="number" min="0" max="2000" id="crPathaoOutside" class="st-rate-in"></td></tr>
-                <tr><td>RedX</td><td><input type="number" min="0" max="2000" id="crRedxInside" class="st-rate-in"></td><td><input type="number" min="0" max="2000" id="crRedxOutside" class="st-rate-in"></td></tr>
-              </tbody>
-            </table>
-            <button type="submit" id="stCourierRatesSave" class="adm-btn">হার Save করুন</button>
-            <span id="stCourierRatesResult" class="st-result" role="status"></span>
+          <form id="stCourierRatesForm" class="cr-rate-card" autocomplete="off" style="margin-top:18px">
+            <div class="cr-rate-head">
+              <div class="cr-rate-mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg></div>
+              <div>
+                <h3>কুরিয়ার চার্জ তুলনা</h3>
+                <p class="cr-rate-hint">আপনার নিজের Pathao ও RedX অ্যাকাউন্টে যে রেট দেখায়, সেটাই এখানে বসান — এখানেই Steadfast-এর সাথে পাশাপাশি তুলনা দেখা যাবে। খালি রাখা ঘরের কুরিয়ার তুলনায় দেখানো হবে না।</p>
+              </div>
+            </div>
+            <div class="cr-rate-table-wrap">
+              <table class="cr-rate-table">
+                <thead><tr><th scope="col"></th><th scope="col">ঢাকার ভিতরে</th><th scope="col">ঢাকার বাইরে</th></tr></thead>
+                <tbody>
+                  <tr class="cr-row cr-steadfast">
+                    <th scope="row"><span class="cr-dot"></span>Steadfast</th>
+                    <td><span class="cr-input"><i>৳</i><input type="number" min="0" max="2000" inputmode="numeric" id="crSteadfastInside" class="st-rate-in" placeholder="০"></span></td>
+                    <td><span class="cr-input"><i>৳</i><input type="number" min="0" max="2000" inputmode="numeric" id="crSteadfastOutside" class="st-rate-in" placeholder="০"></span></td>
+                  </tr>
+                  <tr class="cr-row cr-pathao">
+                    <th scope="row"><span class="cr-dot"></span>Pathao</th>
+                    <td><span class="cr-input"><i>৳</i><input type="number" min="0" max="2000" inputmode="numeric" id="crPathaoInside" class="st-rate-in" placeholder="০"></span></td>
+                    <td><span class="cr-input"><i>৳</i><input type="number" min="0" max="2000" inputmode="numeric" id="crPathaoOutside" class="st-rate-in" placeholder="০"></span></td>
+                  </tr>
+                  <tr class="cr-row cr-redx">
+                    <th scope="row"><span class="cr-dot"></span>RedX</th>
+                    <td><span class="cr-input"><i>৳</i><input type="number" min="0" max="2000" inputmode="numeric" id="crRedxInside" class="st-rate-in" placeholder="০"></span></td>
+                    <td><span class="cr-input"><i>৳</i><input type="number" min="0" max="2000" inputmode="numeric" id="crRedxOutside" class="st-rate-in" placeholder="০"></span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="cr-rate-actions">
+              <button type="submit" id="stCourierRatesSave" class="adm-btn adm-btn-primary">হার Save করুন</button>
+              <span id="stCourierRatesResult" class="st-result" role="status"></span>
+            </div>
           </form>
           <details class="st-howto">
             <summary>GitHub টোকেন বদলানোর ধাপ (মেয়াদ শেষ হলে বা ভুলে মুছে গেলে)</summary>
