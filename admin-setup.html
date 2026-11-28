@@ -49,15 +49,18 @@
 .st-ghkey textarea{width:100%;font:12px/1.4 ui-monospace,Consolas,monospace;padding:8px;border:1px solid #d1d5db;resize:vertical}
 .st-ghkey button{justify-self:start}
 .st-msgr-source{display:block;margin-top:4px;font-size:11px;color:#6b7280}
-.st-msgr-form-wrap{padding:17px;border:1px solid #e0e7f0;border-radius:15px;background:#fff}
-.st-msgr-form{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(220px,1.4fr) auto;align-items:end;gap:12px}
-.st-msgr-field{min-width:0;display:flex;flex-direction:column;gap:7px}.st-msgr-field label{font-size:12px;font-weight:700;color:#344054}
-.st-msgr-field input,.st-msgr-field select{width:100%;min-height:43px;border:1px solid #cbd5e1;border-radius:9px;padding:9px 11px;background:#fff;color:#17243a;font:inherit;box-sizing:border-box}
-.st-msgr-field input:focus,.st-msgr-field select:focus{outline:3px solid #2563eb24;border-color:#3677df}
-.st-msgr-field small{color:#718096;font-size:10px}.st-msgr-form .adm-btn{min-height:43px;white-space:nowrap}
+.st-msgr-form-wrap{padding:20px;border:1px solid #e0e7f0;border-radius:16px;background:#fff;box-shadow:0 1px 2px #1b1f2308}
+.st-msgr-form{display:grid;grid-template-columns:minmax(200px,1fr) minmax(260px,1.6fr);align-items:start;gap:16px 18px}
+.st-msgr-field{min-width:0;display:flex;flex-direction:column;gap:8px}
+.st-msgr-field label{font-size:12px;font-weight:700;color:#344054;line-height:1.3}
+.st-msgr-field input,.st-msgr-field select{width:100%;min-height:44px;border:1px solid #cbd5e1;border-radius:10px;padding:9px 12px;background:#fff;color:#17243a;font:inherit;box-sizing:border-box;transition:border-color .15s,box-shadow .15s}
+.st-msgr-field input:focus,.st-msgr-field select:focus{outline:none;border-color:#1f8f63;box-shadow:0 0 0 3px #1f8f6322}
+.st-msgr-field small{color:#718096;font-size:10.5px;line-height:1.55}
+.st-msgr-form-actions{grid-column:1/-1;display:flex;align-items:center;gap:12px;justify-content:flex-end;margin-top:2px;padding-top:16px;border-top:1px solid #edf1f7}
+.st-msgr-form .adm-btn{min-height:44px;padding:0 24px;white-space:nowrap;border-radius:10px}
 .st-msgr-security{display:flex;gap:8px;align-items:flex-start;margin-top:13px;color:#64748b;font-size:11px;line-height:1.55}
 .st-msgr-security strong{color:#344054}.st-msgr-panel .st-result{margin-top:12px}
-@media(max-width:760px){.st-msgr-form{grid-template-columns:1fr}.st-msgr-form .adm-btn{width:100%}.st-msgr-status-head,.st-msgr-form-title{align-items:flex-start;flex-direction:column;gap:3px}.st-msgr-heading{gap:10px}.st-msgr-mark{width:42px;height:42px;flex-basis:42px}}
+@media(max-width:760px){.st-msgr-form{grid-template-columns:1fr}.st-msgr-form-actions{justify-content:stretch}.st-msgr-form .adm-btn{width:100%}.st-msgr-status-head,.st-msgr-form-title{align-items:flex-start;flex-direction:column;gap:3px}.st-msgr-heading{gap:10px}.st-msgr-mark{width:42px;height:42px;flex-basis:42px}}
 .cr-rate-card{display:block;margin:18px 0 4px;padding:18px;border:1px solid #d9e6df;border-radius:15px;background:linear-gradient(180deg,#fcfdfc 0%,#f6faf7 100%)}
 .cr-rate-head{display:flex;align-items:flex-start;gap:13px;margin-bottom:14px}
 .cr-rate-mark{width:40px;height:40px;flex:0 0 40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#1f8f63,#176b4a);color:#eafff3;box-shadow:0 6px 16px rgba(23,107,74,.25)}
@@ -115,6 +118,8 @@ html[data-admin-theme="dark"] .st-msgr-form-wrap{background:#132019!important;bo
 html[data-admin-theme="dark"] .st-msgr-field label{color:#b7cdbd!important}
 html[data-admin-theme="dark"] .st-msgr-field input,html[data-admin-theme="dark"] .st-msgr-field select{background:#17251e!important;border-color:#3c434a!important;color:#e5f1e8!important}
 html[data-admin-theme="dark"] .st-msgr-field small{color:#7f9488!important}
+html[data-admin-theme="dark"] .st-msgr-field input:focus,html[data-admin-theme="dark"] .st-msgr-field select:focus{border-color:#3fa377!important;box-shadow:0 0 0 3px #1f8f6333!important}
+html[data-admin-theme="dark"] .st-msgr-form-actions{border-top-color:#2c4335!important}
 html[data-admin-theme="dark"] .st-msgr-security{color:#9db7a5!important}
 html[data-admin-theme="dark"] .st-msgr-security strong{color:#e5f1e8!important}
 html[data-admin-theme="dark"] .st-msgr-source{color:#7f9488!important}
@@ -309,7 +314,9 @@ html[data-admin-theme="dark"] .st-msgr-source{color:#7f9488!important}
                 <input id="stMessengerAccessToken" name="accessToken" type="password" autocomplete="new-password" placeholder="Facebook Page Access Token পেস্ট করুন" required minlength="20" maxlength="5000" spellcheck="false">
                 <small id="stMessengerTokenHelp">Business Settings → Users → System users → Generate token (মেয়াদ: Never) থেকে কপি করা Token দিন। একটা Token দিয়েই সব Page সংযুক্ত হবে।</small>
               </div>
-              <button type="submit" class="adm-btn adm-btn-primary" id="stMessengerTokenSave">✓ Token যাচাই করে Save করুন</button>
+              <div class="st-msgr-form-actions">
+                <button type="submit" class="adm-btn adm-btn-primary" id="stMessengerTokenSave">✓ Token যাচাই করে Save করুন</button>
+              </div>
             </form>
           </div>
           <div class="st-msgr-security"><span aria-hidden="true">🔒</span><span><strong>নিরাপদ সংরক্ষণ</strong> · Token সার্ভারে Page ID-এর সঙ্গে মিলিয়ে যাচাই হয়। ভুল Page-এর Token গ্রহণ করা হবে না।</span></div>
